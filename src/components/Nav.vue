@@ -54,7 +54,6 @@ methods: {
       } else {
         this.jwt = localStorage.getItem('Authorization');
       }
-      console.log(`Authorization = ${this.jwt}`);
   },
 },
     created: function () {

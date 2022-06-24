@@ -1,8 +1,8 @@
 <template>
   <div class="projects container-xxl">
     <h1>Проекты</h1>
-    <div class="add-project">
-      <button type="button" class="btn btn-primary" @click="addProject">Новый проект</button>
+    <div class="add-project text-right me-right">
+      <button type="button" class="btn btn-primary float-right me-right" @click="addProject">Новый проект</button>
     </div>
     <div class="search">
       <input
@@ -82,13 +82,11 @@ export default {
         });
         if (!projectRes.ok) {
           if (projectRes.status == 401) {
-            console.log('projectRes.status == 401');
-            //this.localStorage.removeItem('Authorization');
+            console.log('401 Error: You should login');
             this.$router.push('/login');
-            console.log('await this.$router.push(/login);');
           }
           const message = `An error has occured: ${projectRes.status} - ${projectRes.statusText}`;
-          throw new Error(message);
+          console.log(message);
         }
         const projectData = await projectRes.json();
         this.projects = projectData;
@@ -112,10 +110,8 @@ export default {
         const id1CModified = project.id_1C.toString().toLowerCase();
         const titleModified = project.title.toLowerCase();
         const descriptionModified = project.description.toLowerCase();
-        const ownerModified =
-          project.ownerFirstName.toLowerCase() +
-          " " +
-          project.ownerLastName.toLowerCase();
+        const ownerEmailModified =
+          project.ownerEmail.toLowerCase();
         const addressModified = project.city.toLowerCase();
         const createdAtModified = project.createdAt.toLowerCase();
         const searchTerm = this.filter.toLowerCase();
@@ -124,7 +120,7 @@ export default {
           id1CModified.includes(searchTerm) ||
           titleModified.includes(searchTerm) ||
           descriptionModified.includes(searchTerm) ||
-          ownerModified.includes(searchTerm) ||
+          ownerEmailModified.includes(searchTerm) ||
           addressModified.includes(searchTerm) ||
           createdAtModified.includes(searchTerm) ||
           searchTerm == ""

@@ -22,7 +22,7 @@
           </dd>
           <dt class="col-sm-3">Инициатор</dt>
           <dd class="col-sm-9">
-            {{ project.ownerFirstName }} {{ project.ownerLastName }}
+            {{ project.ownerEmail }}
           </dd>
           <dt class="col-sm-3">Адрес</dt>
           <dd class="col-sm-9">
@@ -33,6 +33,22 @@
             {{ project.createdAt }}
           </dd>
         </dl>
+      </div>
+      <div class="update-buttons">
+        <button
+          type="button"
+          class="btn btn-primary float-right me-right"
+          @click="updateProject"
+        >
+          Редактировать проект
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger float-right me-right"
+          @click="deleteProject"
+        >
+          Удалить проект
+        </button>
       </div>
     </div>
 
@@ -46,7 +62,7 @@ export default {
   name: "ProjectDetails",
   data() {
     return {
-      project: null
+      project: null,
     };
   },
   methods: {
@@ -69,10 +85,51 @@ export default {
           }
           const projectData = await projectRes.json();
           this.project = projectData;
-          this.project.createdAt = new Date(projectData.createdAt).toLocaleDateString("ru-RU");
+          this.project.createdAt = new Date(
+            projectData.createdAt
+          ).toLocaleDateString("ru-RU");
         } catch (err) {
           this.project = err.message;
-        };
+        }
+      }
+    },
+    async updateProject() {
+      const id = this.$route.params.id;
+      await this.$router.push(`/project/${id}/edit`);
+    },
+    async deleteProject() {
+      const areYouSure = confirm("Вы уверены, что хотите удалить проект?");
+      if (areYouSure) {
+        const id = this.$route.params.id;
+        if (id) {
+          try {
+            const deleteProjectRes = await fetch(`${baseURL}/project/${id}`, {
+              method: "DELETE",
+              headers: {
+                "Content-type": "application/json",
+                Authorization: localStorage.Authorization,
+              },
+              credentials: "include",
+              body: null,
+            });
+            if (!deleteProjectRes.ok) {
+              if (projectRes.status == 401) {
+                console.log("401: Unauthorized / Авторизуйтесь");
+                this.$router.push("/login");
+              }
+              if (projectRes.status == 403) {
+                console.log("403: Forbidden / Доступ запрещён");
+              }
+              const message = `An error has occured: ${deleteProjectRes.status} - ${deleteProjectRes.statusText}`;
+              console.log(message);
+            }
+            console.log(`Проект ${id} удален`);
+            await alert("Проект удален");
+            await this.$router.push("/project");
+          } catch (err) {
+            this.project = err.message;
+          }
+        }
       }
     },
   },

@@ -1,5 +1,5 @@
 <template>
-  <div class="login container-xxl">
+  <div class="login container-xxl text-center form-signin">
     <form @submit.prevent="submit">
       <h1 class="h3 mb-3 fw-normal">Добро пожаловать</h1>
       <div class="form-floating">
@@ -69,3 +69,11 @@ export default {
   },
 };
 </script>
+<style>
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+}
+</style>
