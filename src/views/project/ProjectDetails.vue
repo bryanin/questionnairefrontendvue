@@ -50,6 +50,58 @@
           Удалить проект
         </button>
       </div>
+      <br />
+      <h2>Задачи к проекту</h2>
+      <div class="add-task text-right me-right">
+        <button
+          type="button"
+          class="btn btn-primary float-right me-right"
+          @click="addTask"
+        >
+          Новая задача
+        </button>
+      </div>
+      <br />
+      <div class="table-responsive-md" v-if="tasks != null">
+        <table class="table table-sm table-striped table-bordered table-hover">
+          <thead class="table-light">
+            <th>ID</th>
+            <th>Инициатор</th>
+            <th>Система</th>
+            <th>Сложность</th>
+            <th>Исполнитель</th>
+            <th>Статус</th>
+            <th>Дата создания</th>
+            <th></th>
+          </thead>
+          <tbody class="table-striped">
+            <tr v-for="task in tasks" :key="task.id">
+              <td class="task">{{ task.id }}</td>
+              <td>{{ task.ownerEmail }}</td>
+              <td>{{ task.system }}</td>
+              <td>{{ task.complexity }}</td>
+              <td>{{ task.performerId }}</td>
+              <td>{{ task.status }}</td>
+              <td>{{ task.createdAt }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  @click="
+                    this.$router.push({
+                      name: 'taskdetails',
+                      params: { id: task.id },
+                    })
+                  "
+                >
+                  Открыть
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-else>Loading...</div>
     </div>
 
     <div v-else>Loading...</div>
@@ -62,7 +114,8 @@ export default {
   name: "ProjectDetails",
   data() {
     return {
-      project: null,
+      project: [],
+      tasks: [],
     };
   },
   methods: {
@@ -91,6 +144,48 @@ export default {
         } catch (err) {
           this.project = err.message;
         }
+        //
+        try {
+          const taskRes = await fetch(`${baseURL}/task`, {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: localStorage.Authorization,
+            },
+            credentials: "include",
+            body: null,
+          });
+          if (!taskRes.ok) {
+            if (taskRes.status == 401) {
+              console.log("401 Error: You should login");
+              this.$router.push("/login");
+            }
+            const message = `An error has occured: ${taskRes.status} - ${taskRes.statusText}`;
+            console.log(message);
+          }
+          const taskData = await taskRes.json();
+
+          taskData.forEach((taskInTaskData) => {
+            if (Number(taskInTaskData.projectId) == Number(id)) {
+              this.tasks.push(taskInTaskData);
+            }
+          });
+          //this.tasks = taskData;
+
+          if (this.tasks != null) {
+            this.tasks.forEach((task) => {
+              task.createdAt = new Date(task.createdAt).toLocaleDateString(
+                "ru-RU"
+              );
+              if (task.performerId == null) {
+                task.performerId = "Не назначен";
+              }
+            });
+          }
+        } catch (err) {
+          this.tasks = err.message;
+        }
+        //
       }
     },
     async updateProject() {
@@ -131,6 +226,10 @@ export default {
           }
         }
       }
+    },
+    async addTask() {
+      const id = this.$route.params.id;
+      await this.$router.push(`/project/${id}/newtask`);
     },
   },
   created: function () {

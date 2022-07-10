@@ -21,9 +21,9 @@
           <li class="nav-item">
             <router-link class="nav-link" to="/project">Проекты</router-link>
           </li>
-          <!-- <li class="nav-item">
+          <li class="nav-item">
             <router-link class="nav-link" to="/task">Задачи</router-link>
-          </li> -->
+          </li>
         </ul>
         <ul class="navbar-nav me-right mb-2 mb-md-0" :key="jwt">
           <li class="nav-item"  v-if="!jwt">

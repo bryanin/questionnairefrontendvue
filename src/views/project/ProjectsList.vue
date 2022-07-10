@@ -23,7 +23,7 @@
           <th>Инициатор</th>
           <th>Адрес</th>
           <th>Дата создания</th>
-          <th>Действия</th>
+          <th></th>
         </thead>
         <tbody class="table-striped">
           <tr v-for="project in projects" :key="project.id">
@@ -128,11 +128,6 @@ export default {
           this.filteredProjects.push(project);
         }
       });
-
-      if (this.filteredProjects != null) {
-        this.filteredProjects.forEach((filteredProject) => {
-        });
-      }
 
       if (this.filteredProjects != null) {
         let filteredProjectIDs = [];
