@@ -16,10 +16,10 @@
           <dd class="col-sm-9">
             {{ task.ownerEmail }}
           </dd>
-          <!-- <dt class="col-sm-3">Система</dt>
+          <dt class="col-sm-3">Система</dt>
           <dd class="col-sm-9">
             {{ task.system }}
-          </dd> -->
+          </dd>
           <dt class="col-sm-3">Сложность</dt>
           <dd class="col-sm-9">
             {{ task.complexity }}
@@ -36,19 +36,48 @@
           <dd class="col-sm-9">
             {{ task.createdAt }}
           </dd>
-          <!-- <dt class="col-sm-3">Описание</dt>
+          <dt class="col-sm-3">Описание</dt>
           <dd class="col-sm-9">
-            {{ JSON.parse(task.content) }}
-          </dd> -->
+            <table
+              class="table table-sm table-striped table-bordered table-hover"
+            >
+              <thead class="table-light">
+                <th>Вопрос</th>
+                <th>Ответ</th>
+              </thead>
+              <tbody class="table-striped">
+                <tr
+                  v-for="item in JSON.parse(this.task.questionnaire).content" :key="item.id"
+                >
+                  <td>{{ item.question }}</td>
+                  <td>
+                    <div v-if="item.answer.simpleAnswer != ''">
+                      {{ item.answer.simpleAnswer }} 
+                    </div>
+                    <div v-else>
+                      <div v-for="miniItem in item.answer.multipleAnswer" :key="miniItem.id">
+                        {{ miniItem.question }} <br /> 
+                        {{ miniItem.answer }} <hr />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </dd>
+          <dt class="col-sm-3">Комментарии</dt>
+          <dd class="col-sm-9">
+            {{ JSON.parse(task.commentList) }}
+          </dd>
         </dl>
       </div>
       <div class="update-buttons">
         <button
           type="button"
           class="btn btn-primary float-right me-right"
-          @click="updateTask"
+          @click="updateTaskStatus"
         >
-          Редактировать задачу
+          Обновить статус задачи
         </button>
         <button
           type="button"
@@ -93,9 +122,9 @@ export default {
           }
           const taskData = await taskRes.json();
           this.task = taskData;
-          this.task.createdAt = new Date(
-            taskData.createdAt
-          ).toLocaleDateString("ru-RU");
+          this.task.createdAt = new Date(taskData.createdAt).toLocaleDateString(
+            "ru-RU"
+          );
         } catch (err) {
           this.task = err.message;
         }

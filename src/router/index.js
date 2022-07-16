@@ -16,7 +16,6 @@ const routes = [
   { path: '/login', name: 'login', component: Login },
   { path: '/logout', name: 'logout', component: Logout },
   { path: '/task', name: 'tasklist', component: TasksList },
-  // { path: '/task/new', name: 'addnewtask', component: AddNewTask },
   { path: '/task/:id', name: 'taskdetails', component: TaskDetails },
   { path: '/project', name: 'projectlist', component: ProjectsList },
   { path: '/project/new', name: 'addnewproject', component: AddNewProject },
