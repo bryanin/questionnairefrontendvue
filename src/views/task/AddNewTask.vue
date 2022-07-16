@@ -16,8 +16,6 @@
               <input type="text" v-model="item.answer.simpleAnswer" class="form-control" />
             </div>
             <div v-else>
-              
-                
                 <div v-for="miniItem in item.answer.multipleAnswer" :key="miniItem.id">
                   <div class="row">
                     <div class="col-2"></div>
@@ -29,11 +27,7 @@
                       <input type="text" v-model="miniItem.answer" class="form-control" />
                     </div>
                   </div>
-
-                  
-              </div>
-              
-              
+                </div>
             </div>
         </div>
       </div>
