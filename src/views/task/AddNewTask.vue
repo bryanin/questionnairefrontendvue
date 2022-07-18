@@ -7,7 +7,7 @@
         <select v-model="selectedSystem" @change="loadQuestionnaire">
           <option v-for="system in systems" :key="system.id" v-bind:value="system.title">{{system.description}}</option>
         </select>
-        <span>Выбрано: {{selectedSystem}}</span>
+        <!-- <span>Выбрано: {{selectedSystem}}</span> -->
       </div>
       <div class="col-12" v-if="selectedQuestionnaire">
         <div v-for="item in selectedQuestionnaire.content" :key="item.id">

@@ -79,6 +79,17 @@
         >
           Обновить статус задачи
         </button>
+        <br />
+        <br />
+        <label>Укажите email клиента<input type="text" v-model="recipient" class="form-control" /></label>
+        <button
+          type="button"
+          class="btn btn-success float-right me-right"
+          @click="sendSimpleEmail"
+        >
+          Отправить опросный лист клиенту
+        </button>
+        <hr />
         <button
           type="button"
           class="btn btn-danger float-right me-right"
@@ -86,6 +97,8 @@
         >
           Удалить задачу
         </button>
+        <br />
+
       </div>
     </div>
 
@@ -100,9 +113,39 @@ export default {
   data() {
     return {
       task: null,
+      recipient: '',
+      messageBody : '',
+      subject : ''
     };
   },
   methods: {
+    async sendSimpleEmail() {
+      const email = {
+        recipient: this.recipient,
+        messageBody: "Добрый день! \nПросим Вас заполнить опросный лист: http://google.com \nПароль для входа: 1234 \n\n С уважением, проектная поддержка Луис+",
+        subject: "Опросный лист"
+      };
+        try {
+          const emailRes = await fetch(`${baseURL}/email/simple`, {
+            method: "POST",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: localStorage.Authorization,
+            },
+            credentials: "include",
+            body: JSON.stringify(email),
+          });
+          if (!emailRes.ok) {
+            const message = `An error has occured: ${emailRes.status} - ${emailRes.statusText}`;
+            throw new Error(message);
+          }
+          await alert('Опросный лист отправлен');
+          await this.$router.push(`/task/`);
+
+        } catch (err) {
+          console.log(err.message);
+        }
+    },
     async getDataById() {
       const id = this.$route.params.id;
       if (id) {
