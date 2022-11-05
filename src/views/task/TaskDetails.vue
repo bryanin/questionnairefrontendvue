@@ -32,6 +32,10 @@
           <dd class="col-sm-9">
             {{ task.status }}
           </dd>
+          <dt class="col-sm-3">Объем работы</dt>
+          <dd class="col-sm-9">
+            {{ task.stageList }}
+          </dd>
           <dt class="col-sm-3">Дата создания</dt>
           <dd class="col-sm-9">
             {{ task.createdAt }}
@@ -67,11 +71,36 @@
           </dd>
           <dt class="col-sm-3">Комментарии</dt>
           <dd class="col-sm-9">
-            {{ JSON.parse(task.commentList) }}
+            <!-- {{ task.commentList }} -->
+            <table
+              class="table table-sm table-striped table-bordered table-hover"
+            >
+              <thead class="table-light">
+                <th>Отправитель</th>
+                <th>Сообщение</th>
+                <th>Ссылка</th>
+                <th>Дата создания</th>
+              </thead>
+              <tbody class="table-striped">
+                <tr
+                  v-for="item in this.task.commentList" :key="item.id"
+                >
+                  <td>{{ item.authorEmail }}</td>
+                  <td>{{ item.message }}</td>
+                  <td>{{ item.filePath }}</td>
+                  <td>{{ item.createdAt }}</td>
+                </tr>
+              </tbody>
+            </table>
           </dd>
         </dl>
       </div>
+      <hr>
+      <div>
+        <h4>Управление задачей</h4>
+      </div>
       <div class="update-buttons">
+        <p>Для того, чтобы запустить, остановить, изменить задачу, необходимо изменить ее статус</p>
         <button
           type="button"
           class="btn btn-primary float-right me-right"
@@ -81,6 +110,7 @@
         </button>
         <br />
         <br />
+        <p>Для того, чтобы отправить email клиенту, вы можете либо указать его почтовый адрес вручную, либо использовать предлагаемые email</p>
         <label>Укажите email клиента<input type="text" v-model="recipient" class="form-control" /></label>
         <button
           type="button"
@@ -171,6 +201,32 @@ export default {
         } catch (err) {
           this.task = err.message;
         }
+        try {
+          const taskCommentRes = await fetch(`${baseURL}/task/${id}/comment`, {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: localStorage.Authorization,
+            },
+            credentials: "include",
+            body: null,
+          });
+          if (!taskCommentRes.ok) {
+            const message = `An error has occured: ${taskCommentRes.status} - ${taskCommentRes.statusText}`;
+            throw new Error(message);
+          }
+          const taskCommentData = await taskCommentRes.json();
+          this.task.commentList = taskCommentData;
+          this.task.commentList.forEach(element => {
+            element.createdAt = new Date(element.createdAt).toLocaleDateString(
+            "ru-RU"
+          )
+          });
+          
+        } catch (err) {
+          this.task = err.message;
+        }
+        //console.log(this.task);
       }
     },
     async updateTask() {

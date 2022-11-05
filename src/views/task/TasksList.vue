@@ -20,6 +20,7 @@
           <th>Сложность</th>
           <th>Исполнитель</th>
           <th>Статус</th>
+          <th>Объем задачи</th>
           <th>Дата создания</th>
           <th></th>
         </thead>
@@ -32,6 +33,7 @@
             <td>{{ task.complexity }}</td>
             <td>{{ task.performerId }}</td>
             <td>{{ task.status }}</td>
+            <td>{{ task.stageList }}</td>
             <td>{{ task.createdAt }}</td>
             <td>
               <button

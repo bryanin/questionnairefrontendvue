@@ -23,6 +23,7 @@
           <th>Инициатор</th>
           <th>Адрес</th>
           <th>Дата создания</th>
+          <th>Статус</th>
           <th></th>
         </thead>
         <tbody class="table-striped">
@@ -32,8 +33,9 @@
             <td>{{ project.title }}</td>
             <td>{{ project.description }}</td>
             <td>{{ project.ownerEmail }}</td>
-            <td>{{ project.city }}</td>
+            <td>{{ project.address.postalCode }}, {{project.address.country}},  {{project.address.region}}, {{project.address.city}}, {{project.address.settlement}}, {{project.address.street}}, {{project.address.house}}, {{project.address.block}}</td>
             <td>{{ project.createdAt }}</td>
+            <td>{{ project.status }}</td>
             <td>
               <button
                 type="button"
@@ -69,7 +71,7 @@ export default {
     };
   },
   methods: {
-    async getAllData() {
+    async getProjects() {
       try {
         const projectRes = await fetch(`${baseURL}/project`, {
           method: "GET",
@@ -91,17 +93,15 @@ export default {
         const projectData = await projectRes.json();
         this.projects = projectData;
         this.projects.forEach((project) => {
-          project.createdAt = new Date(project.createdAt).toLocaleDateString(
-            "ru-RU"
-          );
+          project.createdAt = new Date(project.createdAt).toLocaleDateString("ru-RU");
+          console.log(project.addressList);
         }
         );
-        
       } catch (err) {
         this.projects = err.message;
-      }
-    },
+      };
 
+    },
     async filterProjects() {
       this.filteredProjects = [];
       let all_project_TDs = document.querySelectorAll("td.project");
@@ -110,9 +110,15 @@ export default {
         const id1CModified = project.id_1C.toString().toLowerCase();
         const titleModified = project.title.toLowerCase();
         const descriptionModified = project.description.toLowerCase();
-        const ownerEmailModified =
-          project.ownerEmail.toLowerCase();
-        const addressModified = project.city.toLowerCase();
+        const ownerEmailModified = project.ownerEmail.toLowerCase();
+        const addressPostalCodeModified = String(project.address.postalCode).toLowerCase();
+        const addressCountryModified = project.address.country.toLowerCase();
+        const addressRegionModified = project.address.region.toLowerCase();
+        const addressCityModified = project.address.city.toLowerCase();
+        const addressSettlementModified = project.address.settlement.toLowerCase();
+        const addressStreetModified = project.address.street.toLowerCase();
+        const addressHouseModified = project.address.house.toLowerCase();
+        const addressBlockModified = project.address.block.toLowerCase();
         const createdAtModified = project.createdAt.toLowerCase();
         const searchTerm = this.filter.toLowerCase();
         if (
@@ -121,7 +127,14 @@ export default {
           titleModified.includes(searchTerm) ||
           descriptionModified.includes(searchTerm) ||
           ownerEmailModified.includes(searchTerm) ||
-          addressModified.includes(searchTerm) ||
+          addressPostalCodeModified.includes(searchTerm) ||
+          addressCountryModified.includes(searchTerm) ||
+          addressRegionModified.includes(searchTerm) ||
+          addressCityModified.includes(searchTerm) ||
+          addressSettlementModified.includes(searchTerm) ||
+          addressStreetModified.includes(searchTerm) ||
+          addressHouseModified.includes(searchTerm) ||
+          addressBlockModified.includes(searchTerm) ||
           createdAtModified.includes(searchTerm) ||
           searchTerm == ""
         ) {
@@ -150,7 +163,7 @@ export default {
 
   },
   created: function () {
-    this.getAllData();
+    this.getProjects();
   },
 };
 </script>

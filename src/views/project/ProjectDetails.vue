@@ -26,11 +26,16 @@
           </dd>
           <dt class="col-sm-3">Адрес</dt>
           <dd class="col-sm-9">
-            {{ project.city }}
+            {{ project.address.postalCode }}, {{project.address.country}},  {{project.address.region}}, {{project.address.city}}, {{project.address.settlement}}, {{project.address.street}}, {{project.address.house}}, {{project.address.block}}
           </dd>
           <dt class="col-sm-3">Дата создания</dt>
           <dd class="col-sm-9">
             {{ project.createdAt }}
+          </dd>
+
+          <dt class="col-sm-3">Статус</dt>
+          <dd class="col-sm-9">
+            {{ project.status }}
           </dd>
         </dl>
       </div>
@@ -51,7 +56,8 @@
         </button>
       </div>
       <br />
-      <h2>Задачи к проекту</h2>
+
+      <h3>Задачи к проекту</h3>
       <div class="add-task text-right me-right">
         <button
           type="button"
@@ -61,6 +67,7 @@
           Новая задача
         </button>
       </div>
+
       <br />
       <div class="table-responsive-md" v-if="tasks != null">
         <table class="table table-sm table-striped table-bordered table-hover">
@@ -101,10 +108,47 @@
           </tbody>
         </table>
       </div>
+
       <div v-else>Loading...</div>
     </div>
 
     <div v-else>Loading...</div>
+
+    <h3>Прикрепленные файлы</h3>
+    <div class="project-files text-right me-right">
+      <div class="table-responsive-md" v-if="project != null">
+      <table class="table table-sm table-striped table-bordered table-hover">
+        <thead class="table-light">
+          <th>Задача</th>
+          <th>Ссылка</th>
+        </thead>
+        <tbody class="table-striped">
+          <tr v-for="item in this.project.projectFiles" :key="item.id">
+            <td>{{ item.taskId }}</td>
+            <td>{{ item.filePath }}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <h3>Связанные компании</h3>
+    <div class="project-files text-right me-right">
+      <div class="table-responsive-md" v-if="project != null">
+      <table class="table table-sm table-striped table-bordered table-hover">
+        <thead class="table-light">
+          <th>Компания</th>
+          <th>Роль в проекте</th>
+        </thead>
+        <tbody class="table-striped">
+          <tr v-for="item in this.project.projectPartners" :key="item.id">
+            <td>{{ item.companyTitleShort }}</td>
+            <td>{{ item.partnerRole }}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -114,12 +158,12 @@ export default {
   name: "ProjectDetails",
   data() {
     return {
-      project: [],
+      project: null,
       tasks: [],
     };
   },
   methods: {
-    async getDataById() {
+    async getProjectById() {
       const id = this.$route.params.id;
       if (id) {
         try {
@@ -144,9 +188,12 @@ export default {
         } catch (err) {
           this.project = err.message;
         }
-        //
-        try {
-          const taskRes = await fetch(`${baseURL}/task`, {
+      }
+    },
+    async getTasks() {
+      const id = this.$route.params.id;
+      try {
+          const taskRes = await fetch(`${baseURL}/project/${id}/task`, {
             method: "GET",
             headers: {
               "Content-type": "application/json",
@@ -165,13 +212,12 @@ export default {
           }
           const taskData = await taskRes.json();
 
-          taskData.forEach((taskInTaskData) => {
-            if (Number(taskInTaskData.projectId) == Number(id)) {
-              this.tasks.push(taskInTaskData);
-            }
-          });
-          //this.tasks = taskData;
-
+          // taskData.forEach((taskInTaskData) => {
+          //   if (Number(taskInTaskData.projectId) == Number(id)) {
+          //     this.tasks.push(taskInTaskData);
+          //   }
+          // });
+          this.tasks = taskData;
           if (this.tasks != null) {
             this.tasks.forEach((task) => {
               task.createdAt = new Date(task.createdAt).toLocaleDateString(
@@ -185,10 +231,63 @@ export default {
         } catch (err) {
           this.tasks = err.message;
         }
-        //
-      }
     },
-    async updateProject() {
+        async getProjectFiles() {
+          const id = this.$route.params.id;
+        try {
+          const projectFilesRes = await fetch(`${baseURL}/project/${id}/files`, {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: localStorage.Authorization,
+            },
+            credentials: "include",
+            body: null,
+          });
+          if (!projectFilesRes.ok) {
+            const message = `An error has occured: ${projectFilesRes.status} - ${projectFilesRes.statusText}`;
+            throw new Error(message);
+          }
+          const projectFilesData = await projectFilesRes.json();
+          this.project.projectFiles = projectFilesData;
+
+          
+        } catch (err) {
+          this.project = err.message;
+        }
+    },
+        async getProjectPartners() {
+          const id = this.$route.params.id;
+            try {
+          const projectPartnersRes = await fetch(`${baseURL}/project/${id}/partners`, {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: localStorage.Authorization,
+            },
+            credentials: "include",
+            body: null,
+          });
+          if (!projectPartnersRes.ok) {
+            const message = `An error has occured: ${projectPartnersRes.status} - ${projectPartnersRes.statusText}`;
+            throw new Error(message);
+          }
+          const projectPartnersData = await projectPartnersRes.json();
+
+         
+          // projectPartnersData.forEach(element => {
+          //   console.log("element.companyTitle = getCompanyTitleById(element.companyId);");
+          //   element.companyTitle = getCompanyShortTitleById(element.companyId);
+          //   console.log("element.companyTitle " + element.companyTitle);
+          // });
+          this.project.projectPartners = projectPartnersData;
+          
+          
+        } catch (err) {
+          this.project = err.message;
+        }
+        },
+        async updateProject() {
       const id = this.$route.params.id;
       await this.$router.push(`/project/${id}/edit`);
     },
@@ -231,9 +330,35 @@ export default {
       const id = this.$route.params.id;
       await this.$router.push(`/project/${id}/newtask`);
     },
+    // async getCompanyShortTitleById(companyId) {
+    //   const id = Number(companyId);
+    //   try {
+    //       const companyRes = await fetch(`${baseURL}/company/${id}/shorttitle`, {
+    //         method: "GET",
+    //         headers: {
+    //           "Content-type": "application/json",
+    //           Authorization: localStorage.Authorization,
+    //         },
+    //         credentials: "include",
+    //         body: null,
+    //       });
+    //       if (!companyRes.ok) {
+    //         const message = `An error has occured: ${companyRes.status} - ${companyRes.statusText}`;
+    //         throw new Error(message);
+    //       }
+    //       console.log(companyRes.json());
+    //       return companyRes.json();
+          
+    //     } catch (err) {
+    //       this.project = err.message;
+    //     }
+    // },
   },
   created: function () {
-    this.getDataById();
+    this.getProjectById();
+    this.getTasks();
+    this.getProjectFiles();
+    this.getProjectPartners();
   },
 };
 </script>
