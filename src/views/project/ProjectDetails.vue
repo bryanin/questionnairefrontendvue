@@ -1,8 +1,21 @@
 <template>
   <div class="projectDetails container-xxl">
     <div class="project" v-if="project">
-      <h1>Проект "{{ project.title }}"</h1>
+      <h1 class="title">Проект "{{ project.title }}"</h1>
       <div class="project">
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="flexSwitchCheckDefault"
+            :checked="projectStatus"
+            @click="changeStatus"
+          />
+          <label class="form-check-label" for="flexSwitchCheckDefault">
+            Вкл./выкл.
+          </label>
+        </div>
         <dl class="row">
           <dt class="col-sm-3">ID</dt>
           <dd class="col-sm-9">
@@ -26,13 +39,15 @@
           </dd>
           <dt class="col-sm-3">Адрес</dt>
           <dd class="col-sm-9">
-            {{ project.address.postalCode }}, {{project.address.country}},  {{project.address.region}}, {{project.address.city}}, {{project.address.settlement}}, {{project.address.street}}, {{project.address.house}}, {{project.address.block}}
+            {{ project.address.postalCode }}, {{ project.address.country }},
+            {{ project.address.region }}, {{ project.address.city }},
+            {{ project.address.settlement }}, {{ project.address.street }},
+            {{ project.address.house }}, {{ project.address.block }}
           </dd>
           <dt class="col-sm-3">Дата создания</dt>
           <dd class="col-sm-9">
             {{ project.createdAt }}
           </dd>
-
           <dt class="col-sm-3">Статус</dt>
           <dd class="col-sm-9">
             {{ project.status }}
@@ -117,36 +132,45 @@
     <h3>Прикрепленные файлы</h3>
     <div class="project-files text-right me-right">
       <div class="table-responsive-md" v-if="project != null">
-      <table class="table table-sm table-striped table-bordered table-hover">
-        <thead class="table-light">
-          <th>Задача</th>
-          <th>Ссылка</th>
-        </thead>
-        <tbody class="table-striped">
-          <tr v-for="item in this.project.projectFiles" :key="item.id">
-            <td>{{ item.taskId }}</td>
-            <td>{{ item.filePath }}</td>
-          </tr>
-        </tbody>
-      </table>
+        <table class="table table-sm table-striped table-bordered table-hover">
+          <thead class="table-light">
+            <th>Задача</th>
+            <th>Ссылка</th>
+          </thead>
+          <tbody class="table-striped">
+            <tr v-for="item in this.project.projectFiles" :key="item.id">
+              <td>{{ item.taskId }}</td>
+              <td>{{ item.filePath }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <h3>Связанные компании</h3>
     <div class="project-files text-right me-right">
       <div class="table-responsive-md" v-if="project != null">
-      <table class="table table-sm table-striped table-bordered table-hover">
-        <thead class="table-light">
-          <th>Компания</th>
-          <th>Роль в проекте</th>
-        </thead>
-        <tbody class="table-striped">
-          <tr v-for="item in this.project.projectPartners" :key="item.id">
-            <td>{{ item.companyTitleShort }}</td>
-            <td>{{ item.partnerRole }}</td>
-          </tr>
-        </tbody>
-      </table>
+        <table class="table table-sm table-striped table-bordered table-hover">
+          <thead class="table-light">
+            <th>Компания</th>
+            <th>Роль в проекте</th>
+          </thead>
+          <tbody class="table-striped">
+            <tr v-for="item in this.project.projectPartners" :key="item.id">
+              <td>{{ item.companyTitleShort }}</td>
+              <td>{{ item.partnerRole }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <button
+            type="button"
+            class="btn btn-primary float-right me-right"
+            @click="updateProjectPartners"
+          >
+            Удалить проект
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -160,6 +184,7 @@ export default {
     return {
       project: null,
       tasks: [],
+      projectStatus: false,
     };
   },
   methods: {
@@ -182,9 +207,20 @@ export default {
           }
           const projectData = await projectRes.json();
           this.project = projectData;
+
           this.project.createdAt = new Date(
             projectData.createdAt
           ).toLocaleDateString("ru-RU");
+
+          if (this.project.status == "ACTIVE") {
+            this.projectStatus = true;
+          } else {
+            this.projectStatus = false;
+          }
+
+          this.getTasks();
+          this.getProjectFiles();
+          this.getProjectPartners();
         } catch (err) {
           this.project = err.message;
         }
@@ -193,49 +229,68 @@ export default {
     async getTasks() {
       const id = this.$route.params.id;
       try {
-          const taskRes = await fetch(`${baseURL}/project/${id}/task`, {
-            method: "GET",
-            headers: {
-              "Content-type": "application/json",
-              Authorization: localStorage.Authorization,
-            },
-            credentials: "include",
-            body: null,
-          });
-          if (!taskRes.ok) {
-            if (taskRes.status == 401) {
-              console.log("401 Error: You should login");
-              this.$router.push("/login");
+        const taskRes = await fetch(`${baseURL}/project/${id}/task`, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: localStorage.Authorization,
+          },
+          credentials: "include",
+          body: null,
+        });
+        if (!taskRes.ok) {
+          if (taskRes.status == 401) {
+            console.log("401 Error: You should login");
+            this.$router.push("/login");
+          }
+          const message = `An error has occured: ${taskRes.status} - ${taskRes.statusText}`;
+          console.log(message);
+        }
+        const taskData = await taskRes.json();
+
+        this.tasks = taskData;
+        if (this.tasks != null) {
+          this.tasks.forEach((task) => {
+            task.createdAt = new Date(task.createdAt).toLocaleDateString(
+              "ru-RU"
+            );
+            if (task.performerId == null) {
+              task.performerId = "Не назначен";
             }
-            const message = `An error has occured: ${taskRes.status} - ${taskRes.statusText}`;
-            console.log(message);
-          }
-          const taskData = await taskRes.json();
-
-          // taskData.forEach((taskInTaskData) => {
-          //   if (Number(taskInTaskData.projectId) == Number(id)) {
-          //     this.tasks.push(taskInTaskData);
-          //   }
-          // });
-          this.tasks = taskData;
-          if (this.tasks != null) {
-            this.tasks.forEach((task) => {
-              task.createdAt = new Date(task.createdAt).toLocaleDateString(
-                "ru-RU"
-              );
-              if (task.performerId == null) {
-                task.performerId = "Не назначен";
-              }
-            });
-          }
-        } catch (err) {
-          this.tasks = err.message;
+          });
         }
+      } catch (err) {
+        this.tasks = err.message;
+      }
     },
-        async getProjectFiles() {
-          const id = this.$route.params.id;
-        try {
-          const projectFilesRes = await fetch(`${baseURL}/project/${id}/files`, {
+    async getProjectFiles() {
+      const id = this.$route.params.id;
+      try {
+        const projectFilesRes = await fetch(`${baseURL}/project/${id}/files`, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: localStorage.Authorization,
+          },
+          credentials: "include",
+          body: null,
+        });
+        if (!projectFilesRes.ok) {
+          const message = `An error has occured: ${projectFilesRes.status} - ${projectFilesRes.statusText}`;
+          throw new Error(message);
+        }
+        const projectFilesData = await projectFilesRes.json();
+        this.project.projectFiles = projectFilesData;
+      } catch (err) {
+        this.project = err.message;
+      }
+    },
+    async getProjectPartners() {
+      const id = this.$route.params.id;
+      try {
+        const projectPartnersRes = await fetch(
+          `${baseURL}/project/${id}/partners`,
+          {
             method: "GET",
             headers: {
               "Content-type": "application/json",
@@ -243,51 +298,20 @@ export default {
             },
             credentials: "include",
             body: null,
-          });
-          if (!projectFilesRes.ok) {
-            const message = `An error has occured: ${projectFilesRes.status} - ${projectFilesRes.statusText}`;
-            throw new Error(message);
           }
-          const projectFilesData = await projectFilesRes.json();
-          this.project.projectFiles = projectFilesData;
-
-          
-        } catch (err) {
-          this.project = err.message;
+        );
+        if (!projectPartnersRes.ok) {
+          const message = `An error has occured: ${projectPartnersRes.status} - ${projectPartnersRes.statusText}`;
+          throw new Error(message);
         }
+        const projectPartnersData = await projectPartnersRes.json();
+
+        this.project.projectPartners = projectPartnersData;
+      } catch (err) {
+        this.project = err.message;
+      }
     },
-        async getProjectPartners() {
-          const id = this.$route.params.id;
-            try {
-          const projectPartnersRes = await fetch(`${baseURL}/project/${id}/partners`, {
-            method: "GET",
-            headers: {
-              "Content-type": "application/json",
-              Authorization: localStorage.Authorization,
-            },
-            credentials: "include",
-            body: null,
-          });
-          if (!projectPartnersRes.ok) {
-            const message = `An error has occured: ${projectPartnersRes.status} - ${projectPartnersRes.statusText}`;
-            throw new Error(message);
-          }
-          const projectPartnersData = await projectPartnersRes.json();
-
-         
-          // projectPartnersData.forEach(element => {
-          //   console.log("element.companyTitle = getCompanyTitleById(element.companyId);");
-          //   element.companyTitle = getCompanyShortTitleById(element.companyId);
-          //   console.log("element.companyTitle " + element.companyTitle);
-          // });
-          this.project.projectPartners = projectPartnersData;
-          
-          
-        } catch (err) {
-          this.project = err.message;
-        }
-        },
-        async updateProject() {
+    async updateProject() {
       const id = this.$route.params.id;
       await this.$router.push(`/project/${id}/edit`);
     },
@@ -330,38 +354,69 @@ export default {
       const id = this.$route.params.id;
       await this.$router.push(`/project/${id}/newtask`);
     },
-    // async getCompanyShortTitleById(companyId) {
-    //   const id = Number(companyId);
-    //   try {
-    //       const companyRes = await fetch(`${baseURL}/company/${id}/shorttitle`, {
-    //         method: "GET",
-    //         headers: {
-    //           "Content-type": "application/json",
-    //           Authorization: localStorage.Authorization,
-    //         },
-    //         credentials: "include",
-    //         body: null,
-    //       });
-    //       if (!companyRes.ok) {
-    //         const message = `An error has occured: ${companyRes.status} - ${companyRes.statusText}`;
-    //         throw new Error(message);
-    //       }
-    //       console.log(companyRes.json());
-    //       return companyRes.json();
-          
-    //     } catch (err) {
-    //       this.project = err.message;
-    //     }
-    // },
+    async updateProjectPartners() {
+      //
+    },
+    async changeStatus() {
+      let areYouSure = true;
+      if (this.projectStatus == true && this.tasks != null) {
+        areYouSure = confirm(
+          'Вы собираетесь перенести проект в архив. Есть несколько связанных с проектом задач. В случае переноса в архив все эти задачи станут неактивными. Вы уверены?'
+        );
+      }
+
+
+      if (areYouSure) {
+        
+        this.projectStatus = !this.projectStatus;
+
+        if (this.project.status == "ACTIVE") {
+          this.project.status = "ARCHIVED";
+        } else {
+          this.project.status = "ACTIVE";
+        }
+        console.log("this.project.status = " + this.project.status);
+
+        this.project.createdAt = new Date(this.project.createdAt);
+
+        const id = this.$route.params.id;
+
+        try {
+          const projectRes = await fetch(`${baseURL}/project/${id}`, {
+            method: "PATCH",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: localStorage.Authorization,
+            },
+            credentials: "include",
+            body: JSON.stringify(this.project),
+          });
+          if (!projectRes.ok) {
+            const message = `An error has occured: ${projectRes.status} - ${projectRes.statusText}`;
+            throw new Error(message);
+          }
+        } catch (err) {
+          this.project = err.message;
+        }
+        this.getProjectById();
+        //this.$router.push("/project");
+      } else {
+        this.projectStatus = true;
+        console.log("this.projectStatus = " + this.project.status);
+      }
+    },
   },
   created: function () {
     this.getProjectById();
-    this.getTasks();
-    this.getProjectFiles();
-    this.getProjectPartners();
   },
 };
 </script>
 
 <style>
+.title {
+  text-align: center;
+}
+.form-switch {
+  float: right;
+}
 </style>

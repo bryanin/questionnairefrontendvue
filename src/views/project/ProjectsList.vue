@@ -94,9 +94,9 @@ export default {
         this.projects = projectData;
         this.projects.forEach((project) => {
           project.createdAt = new Date(project.createdAt).toLocaleDateString("ru-RU");
-          console.log(project.addressList);
         }
         );
+        console.log("this.projects[0].id" + this.projects[0].id);
       } catch (err) {
         this.projects = err.message;
       };

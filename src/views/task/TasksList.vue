@@ -10,6 +10,27 @@
         placeholder="Поиск по всем столбцам"
       />
     </div>
+
+    <div class="my-otpions">
+      <div class="my-tasks">
+        <input 
+        type="checkbox" 
+        id="my-tasks" 
+        name="my-tasks" 
+        :checked="myTasks"> 
+        <label for="my-tasks">Мои задачи</label>
+      </div>
+      <div class="actual-tasks">
+        <input 
+        type="checkbox" 
+        id="actual-tasks" 
+        name="actual-tasks" 
+        :checked="actualTasks"> 
+        <label for="actual-tasks">Только актуальные задачи</label>
+      </div>
+    </div>
+    <br>
+
     <div class="table-responsive-md" v-if="tasks">
       <table class="table table-sm table-striped table-bordered table-hover">
         <thead class="table-light">
@@ -68,11 +89,12 @@ export default {
       users: null,
       filter: "",
       filteredTasks: [],
-      
+      actualTasks: true,
+      myTasks: true,
     };
   },
   methods: {
-    async getAllData() {
+    async getTasks() {
       try {
         const taskRes = await fetch(`${baseURL}/task`, {
           method: "GET",
@@ -113,18 +135,20 @@ export default {
         const idModified = task.id.toString().toLowerCase();
         const projectIdModified = task.projectId.toString().toLowerCase();
         const ownerEmailModified = task.ownerEmail.toLowerCase();
-        const systemModified = task.system.toLowerCase();
+        const securitySystemModified = task.securitySystem.toLowerCase();
         const complexityModified = task.complexity.toLowerCase();
         const performerIdModified = task.performerId.toLowerCase();
+        const stageListModified = task.stageList.toString().toLowerCase();
         const createdAtModified = task.createdAt.toLowerCase();
         const searchTerm = this.filter.toLowerCase();
         if (
           idModified.includes(searchTerm) ||
           projectIdModified.includes(searchTerm) ||
           ownerEmailModified.includes(searchTerm) ||
-          systemModified.includes(searchTerm) ||
+          securitySystemModified.includes(searchTerm) ||
           complexityModified.includes(searchTerm) ||
           performerIdModified.includes(searchTerm) ||
+          stageListModified.includes(searchTerm) ||
           createdAtModified.includes(searchTerm) ||
           searchTerm == ""
         ) {
@@ -153,7 +177,7 @@ export default {
 
   },
   created: function () {
-    this.getAllData();
+    this.getTasks();
   },
 };
 </script>

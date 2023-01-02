@@ -9,6 +9,7 @@ import ProjectsList from '@/views/project/ProjectsList.vue'
 import AddNewProject from '@/views/project/AddNewProject.vue'
 import ProjectDetails from '@/views/project/ProjectDetails.vue'
 import EditProjectDetails from '@/views/project/EditProjectDetails.vue'
+import EmployeesList from '@/views/user/EmployeesList.vue'
 
 
 const routes = [
@@ -21,7 +22,8 @@ const routes = [
   { path: '/project/new', name: 'addnewproject', component: AddNewProject },
   { path: '/project/:id', name: 'projectdetails', component: ProjectDetails },
   { path: '/project/:id/edit', name: 'editprojectdetails', component: EditProjectDetails },
-  { path: '/project/:id/newtask', name: 'addnewtask', component: AddNewTask }
+  { path: '/project/:id/newtask', name: 'addnewtask', component: AddNewTask },
+  { path: '/employee', name: 'employeelist', component: EmployeesList }
 ]
 
 const router = createRouter({
