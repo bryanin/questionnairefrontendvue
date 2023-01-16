@@ -92,10 +92,10 @@ export default {
         }
         const projectData = await projectRes.json();
         this.projects = projectData;
-        this.projects.forEach((project) => {
-          project.createdAt = new Date(project.createdAt).toLocaleDateString("ru-RU");
-        }
-        );
+        // this.projects.forEach((project) => {
+        //   project.createdAt = new Date(project.createdAt).toLocaleDateString("ru-RU");
+        // }
+        // );
         console.log("this.projects[0].id" + this.projects[0].id);
       } catch (err) {
         this.projects = err.message;

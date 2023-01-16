@@ -17,7 +17,7 @@
         type="checkbox" 
         id="my-tasks" 
         name="my-tasks" 
-        :checked="myTasks"> 
+        :checked="myTasksFilter"> 
         <label for="my-tasks">Мои задачи</label>
       </div>
       <div class="actual-tasks">
@@ -25,7 +25,7 @@
         type="checkbox" 
         id="actual-tasks" 
         name="actual-tasks" 
-        :checked="actualTasks"> 
+        :checked="actualTasksFilter"> 
         <label for="actual-tasks">Только актуальные задачи</label>
       </div>
     </div>
@@ -49,12 +49,17 @@
           <tr v-for="task in tasks" :key="task.id">
             <td class="task">{{ task.id }}</td>
             <td>{{ task.projectId }}</td>
-            <td>{{ task.ownerEmail }}</td>
-            <td>{{ task.system }}</td>
-            <td>{{ task.complexity }}</td>
-            <td>{{ task.performerId }}</td>
-            <td>{{ task.status }}</td>
-            <td>{{ task.stageList }}</td>
+            <td>{{ task.ownerLastName }} {{ task.ownerFirstName }}</td>
+            <td>{{ task.securitySystemDescription }}</td>
+            <td>{{ task.complexityDescription }}</td>
+            <td>
+              <div v-if="task.performerLastName">
+                {{ task.performerLastName }} {{ task.performerFirstName }}
+                </div>
+                <div v-else>Не назначен</div>
+            </td>
+            <td>{{ task.statusDescription }}</td>
+            <td>{{ task.stageSetDescription }}</td>
             <td>{{ task.createdAt }}</td>
             <td>
               <button
@@ -85,12 +90,12 @@ export default {
   name: "TasksList",
   data() {
     return {
-      tasks: null,
-      users: null,
+      tasks: [],
+      users: [],
       filter: "",
       filteredTasks: [],
-      actualTasks: true,
-      myTasks: true,
+      actualTasksFilter: true,
+      myTasksFilter: true,
     };
   },
   methods: {
@@ -112,17 +117,10 @@ export default {
           }
           const message = `An error has occured: ${taskRes.status} - ${taskRes.statusText}`;
           console.log(message);
+          console.log(taskData);
         }
         const taskData = await taskRes.json();
         this.tasks = taskData;
-        this.tasks.forEach((task) => {
-          task.createdAt = new Date(task.createdAt).toLocaleDateString("ru-RU");
-          if (task.performerId == null) {
-            task.performerId = "Не назначен";
-          }
-        }
-        );
-        
       } catch (err) {
         this.tasks = err.message;
       }
@@ -134,21 +132,25 @@ export default {
       this.tasks.forEach((task) => {
         const idModified = task.id.toString().toLowerCase();
         const projectIdModified = task.projectId.toString().toLowerCase();
-        const ownerEmailModified = task.ownerEmail.toLowerCase();
-        const securitySystemModified = task.securitySystem.toLowerCase();
-        const complexityModified = task.complexity.toLowerCase();
-        const performerIdModified = task.performerId.toLowerCase();
-        const stageListModified = task.stageList.toString().toLowerCase();
+        const ownerLastNameModified = task.ownerLastName.toLowerCase();
+        const ownerFirstNameModified = task.ownerFirstName.toLowerCase();
+        const securitySystemDescriptionModified = task.securitySystemDescription.toLowerCase();
+        const complexityDescriptionModified = task.complexityDescription.toLowerCase();
+        //const performerLastNameModified = task.performerLastName.toLowerCase();
+        //const performerFirstNameModified = task.performerFirstName.toLowerCase();
+        const stageSetDescriptionModified = task.stageSetDescription.toString().toLowerCase();
         const createdAtModified = task.createdAt.toLowerCase();
         const searchTerm = this.filter.toLowerCase();
         if (
           idModified.includes(searchTerm) ||
           projectIdModified.includes(searchTerm) ||
-          ownerEmailModified.includes(searchTerm) ||
-          securitySystemModified.includes(searchTerm) ||
-          complexityModified.includes(searchTerm) ||
-          performerIdModified.includes(searchTerm) ||
-          stageListModified.includes(searchTerm) ||
+          ownerLastNameModified.includes(searchTerm) ||
+          ownerFirstNameModified.includes(searchTerm) ||
+          securitySystemDescriptionModified.includes(searchTerm) ||
+          complexityDescriptionModified.includes(searchTerm) ||
+          //performerLastNameModified.includes(searchTerm) ||
+          //performerFirstNameModified.includes(searchTerm) ||
+          stageSetDescriptionModified.includes(searchTerm) ||
           createdAtModified.includes(searchTerm) ||
           searchTerm == ""
         ) {

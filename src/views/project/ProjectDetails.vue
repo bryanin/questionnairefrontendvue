@@ -35,7 +35,7 @@
           </dd>
           <dt class="col-sm-3">Инициатор</dt>
           <dd class="col-sm-9">
-            {{ project.ownerEmail }}
+            {{ project.ownerLastName }} {{ project.ownerFirstName }}
           </dd>
           <dt class="col-sm-3">Адрес</dt>
           <dd class="col-sm-9">
@@ -99,11 +99,14 @@
           <tbody class="table-striped">
             <tr v-for="task in tasks" :key="task.id">
               <td class="task">{{ task.id }}</td>
-              <td>{{ task.ownerEmail }}</td>
-              <td>{{ task.system }}</td>
-              <td>{{ task.complexity }}</td>
-              <td>{{ task.performerId }}</td>
-              <td>{{ task.status }}</td>
+              <td>{{ task.ownerLastName }} {{ task.ownerFirstName }}</td>
+              <td>{{ task.securitySystemDescription }}</td>
+              <td>{{ task.complexityDescription }}</td>
+              <div v-if="task.performerId">
+                <td>{{ task.performerLastName }} {{ task.performerFirstName }}</td>
+              </div>
+              <div v-else>Не назначен</div>
+              <td>{{ task.statusDescription }}</td>
               <td>{{ task.createdAt }}</td>
               <td>
                 <button
@@ -138,7 +141,7 @@
             <th>Ссылка</th>
           </thead>
           <tbody class="table-striped">
-            <tr v-for="item in this.project.projectFiles" :key="item.id">
+            <tr v-for="item in project.projectFiles" :key="item.id">
               <td>{{ item.taskId }}</td>
               <td>{{ item.filePath }}</td>
             </tr>
@@ -208,9 +211,9 @@ export default {
           const projectData = await projectRes.json();
           this.project = projectData;
 
-          this.project.createdAt = new Date(
-            projectData.createdAt
-          ).toLocaleDateString("ru-RU");
+          // this.project.createdAt = new Date(
+          //   projectData.createdAt
+          // ).toLocaleDateString("ru-RU");
 
           if (this.project.status == "ACTIVE") {
             this.projectStatus = true;
@@ -251,12 +254,12 @@ export default {
         this.tasks = taskData;
         if (this.tasks != null) {
           this.tasks.forEach((task) => {
-            task.createdAt = new Date(task.createdAt).toLocaleDateString(
-              "ru-RU"
-            );
-            if (task.performerId == null) {
-              task.performerId = "Не назначен";
-            }
+            // task.createdAt = new Date(task.createdAt).toLocaleDateString(
+            //   "ru-RU"
+            // );
+            // if (task.performerId == null) {
+            //   task.performerId = "Не назначен";
+            // }
           });
         }
       } catch (err) {
@@ -281,6 +284,7 @@ export default {
         }
         const projectFilesData = await projectFilesRes.json();
         this.project.projectFiles = projectFilesData;
+        console.log(this.project.projectFiles);
       } catch (err) {
         this.project = err.message;
       }
@@ -364,23 +368,15 @@ export default {
           'Вы собираетесь перенести проект в архив. Есть несколько связанных с проектом задач. В случае переноса в архив все эти задачи станут неактивными. Вы уверены?'
         );
       }
-
-
       if (areYouSure) {
-        
         this.projectStatus = !this.projectStatus;
-
         if (this.project.status == "ACTIVE") {
           this.project.status = "ARCHIVED";
         } else {
           this.project.status = "ACTIVE";
         }
-        console.log("this.project.status = " + this.project.status);
-
-        this.project.createdAt = new Date(this.project.createdAt);
-
+        // this.project.createdAt = new Date(this.project.createdAt);
         const id = this.$route.params.id;
-
         try {
           const projectRes = await fetch(`${baseURL}/project/${id}`, {
             method: "PATCH",

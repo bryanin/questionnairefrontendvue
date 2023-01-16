@@ -1,6 +1,9 @@
 <template>
   <div class="employees container-xxl">
     <h1>Сотрудники</h1>
+    <div class="add-employee text-right me-right">
+      <button type="button" class="btn btn-primary float-right me-right" @click="addNewEmployee">Добавить нового сотрудника</button>
+    </div>
     <div class="search">
       <input
         type="text"
@@ -19,7 +22,6 @@
           <th>Почта</th>
           <th>Телефон</th>
           <th>Должность</th>
-          <th>Статус</th>
           <th></th>
         </thead>
         <tbody class="table-striped">
@@ -29,8 +31,7 @@
             <td>{{ employee.firstName }}</td>
             <td>{{ employee.email }}</td>
             <td>{{ employee.phone }}</td>
-            <td>{{ employee.position }}</td>
-            <td>{{ employee.accessStatus }}</td>
+            <td>{{ employee.positionTitle }}</td>
             <td>
               <button
                 type="button"
@@ -65,6 +66,10 @@ export default {
     };
   },
   methods: {
+    async addNewEmployee() {
+      const id = this.$route.params.id;
+      await this.$router.push(`/employee/new`);
+    },
     async getEmployees() {
       try {
         const employeeRes = await fetch(`${baseURL}/employee`, {
