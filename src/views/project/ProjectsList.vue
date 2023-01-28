@@ -33,7 +33,7 @@
             <td>{{ project.title }}</td>
             <td>{{ project.description }}</td>
             <td>{{ project.ownerEmail }}</td>
-            <td>{{ project.address.postalCode }}, {{project.address.country}},  {{project.address.region}}, {{project.address.city}}, {{project.address.settlement}}, {{project.address.street}}, {{project.address.house}}, {{project.address.block}}</td>
+            <td>{{ project.addressPostalCodeToString }}, {{project.addressCountryToString}},  {{project.addressRegionToString}}, {{project.addressCityToString}}, {{project.addressSettlementToString}}, {{project.addressStreetToString}}, {{project.addressHouseToString}}, {{project.addressBlockToString}}</td>
             <td>{{ project.createdAt }}</td>
             <td>{{ project.status }}</td>
             <td>

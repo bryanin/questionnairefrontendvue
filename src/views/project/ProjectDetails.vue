@@ -39,10 +39,10 @@
           </dd>
           <dt class="col-sm-3">Адрес</dt>
           <dd class="col-sm-9">
-            {{ project.address.postalCode }}, {{ project.address.country }},
-            {{ project.address.region }}, {{ project.address.city }},
-            {{ project.address.settlement }}, {{ project.address.street }},
-            {{ project.address.house }}, {{ project.address.block }}
+            {{ project.addressPostalCodeToString }}, {{ project.addressCountryToString }},
+            {{ project.addressRegionToString }}, {{ project.addressCityToString }},
+            {{ project.addressSettlementToString }}, {{ project.addressStreetToString }},
+            {{ project.addressHouseToString }}, {{ project.addressBlockToString }}
           </dd>
           <dt class="col-sm-3">Дата создания</dt>
           <dd class="col-sm-9">
@@ -252,16 +252,17 @@ export default {
         const taskData = await taskRes.json();
 
         this.tasks = taskData;
-        if (this.tasks != null) {
-          this.tasks.forEach((task) => {
-            // task.createdAt = new Date(task.createdAt).toLocaleDateString(
-            //   "ru-RU"
-            // );
-            // if (task.performerId == null) {
-            //   task.performerId = "Не назначен";
-            // }
-          });
-        }
+        //console.log(this.tasks);
+        // if (this.tasks != null) {
+        //   this.tasks.forEach((task) => {
+        //     task.createdAt = new Date(task.createdAt).toLocaleDateString(
+        //       "ru-RU"
+        //     );
+        //     if (task.performerId == null) {
+        //       task.performerId = "Не назначен";
+        //     }
+        //   });
+        // }
       } catch (err) {
         this.tasks = err.message;
       }
@@ -284,7 +285,6 @@ export default {
         }
         const projectFilesData = await projectFilesRes.json();
         this.project.projectFiles = projectFilesData;
-        console.log(this.project.projectFiles);
       } catch (err) {
         this.project = err.message;
       }
@@ -363,7 +363,7 @@ export default {
     },
     async changeStatus() {
       let areYouSure = true;
-      if (this.projectStatus == true && this.tasks != null) {
+      if (this.projectStatus == true && this.tasks.length > 0) {
         areYouSure = confirm(
           'Вы собираетесь перенести проект в архив. Есть несколько связанных с проектом задач. В случае переноса в архив все эти задачи станут неактивными. Вы уверены?'
         );

@@ -39,7 +39,7 @@
               class="form-control"
               id="inputAddressPostalCode"
               placeholder="Например, 125040"
-              v-model="project.address.postalCode"
+              v-model="project.addressPostalCodeToString"
             />
           </div>
           <div class="col-3">
@@ -49,7 +49,7 @@
               class="form-control"
               id="inputAddressCountry"
               placeholder="Например, Россия"
-              v-model="project.address.country"
+              v-model="project.addressCountryToString"
             />
           </div>
           <div class="col-3">
@@ -59,7 +59,7 @@
               class="form-control"
               id="inputAddressRegion"
               placeholder="Например, Московская"
-              v-model="project.address.region"
+              v-model="project.addressRegionToString"
             />
           </div>
           <div class="col-3">
@@ -69,7 +69,7 @@
               class="form-control"
               id="inputAddressCity"
               placeholder="Например, Москва"
-              v-model="project.address.city"
+              v-model="project.addressCityToString"
             />
           </div>
           <div class="col-3">
@@ -79,7 +79,7 @@
               class="form-control"
               id="inputAddressSettlement"
               placeholder="-"
-              v-model="project.address.settlement"
+              v-model="project.addressSettlementToString"
             />
           </div>
           <div class="col-3">
@@ -89,7 +89,7 @@
               class="form-control"
               id="inputAddressStreet"
               placeholder="Например, 1-я Ямского Поля"
-              v-model="project.address.street"
+              v-model="project.addressStreetToString"
             />
           </div>
           <div class="col-1">
@@ -99,7 +99,7 @@
               class="form-control"
               id="inputAddressHouse"
               placeholder="Например, 1"
-              v-model="project.address.house"
+              v-model="project.addressHouseToString"
             />
           </div>
           <div class="col-1">
@@ -109,7 +109,7 @@
               class="form-control"
               id="inputAddressBlock"
               placeholder="-"
-              v-model="project.address.block"
+              v-model="project.addressBlockToString"
             />
           </div>
           <div class="col-12">
@@ -132,16 +132,15 @@ export default {
         "title": "",
         "description": "",
         "ownerEmail": "",
-        "address": {
-          "postalCode" : "",
-          "country" : "",
-          "region" : "",
-          "city" : "",
-          "settlement" : "",
-          "street" : "",
-          "house" : "",
-          "block" : ""
-        },
+        "addressIdToString": null,
+        "addressPostalCodeToString" : "",
+        "addressCountryToString" : "",
+        "addressRegionToString" : "",
+        "addressCityToString" : "",
+        "addressSettlementToString" : "",
+        "addressStreetToString" : "",
+        "addressHouseToString" : "",
+        "addressBlockToString" : "",
         "createdAt": null,
       },
     };
